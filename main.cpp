@@ -1,116 +1,69 @@
-#include <iostream>
-#include <fstream>
-#include <string.h>
-#include <vector>
-#include <algorithm>
-#include <iterator>
+/*
+ * main.cpp
+ */
+
 #include "tokens.h"
 #include "parse.h"
-#include "parsetree.h"
-#include "tokens.h"
+#include <fstream>
+using std::cin;
+using std::cout;
+using std::endl;
+using std::ifstream;
 
-// #include <cxxabi.h>
-
-using namespace std;
-
-extern map<string, int> mapv;
-
-//Credits to Nick Delello
-/*
-array<string, 4> names = {"ERRTYPE", "INTTYPE", "STRTYPE", "BOOLTYPE"};
-
-//Demangles class names when printing them out for debugging.
-string demangle(const char* name) {
-    int status;
-    char* demangledName = abi::__cxa_demangle(name, nullptr, nullptr, &status);
-    string retVal = string(demangledName);
-    free(demangledName);
-    return retVal;
-}
-
-// Prints out the parse tree if debug is enabled.
-void debugPrint(ParseTree* tree, uint level = 0) {
-    ParseTree* currTree = tree->getLeft();
-    string className = demangle(typeid(*tree).name());
-    cout << string(level, '\t') << className << string(8 - level - className.length() / 4, '\t') << names[tree->GetType()] << '\n';
-    if (currTree)
-        debugPrint(currTree, level + 1);
-    currTree = tree->getRight();
-    if (currTree)
-        debugPrint(currTree, level + (className != "StmtList"));
-}
-*/
-
-int main(int argc, char* argv[])
+int
+main(int argc, char *argv[])
 {
-    ifstream infile1;
-    istream *in = &cin;
+    ifstream file;
+    istream *in;
     int linenum = 0;
 
-    for(int i = 1; i < argc; i++)
-    {
-        string arg(argv[i]);
-        if(in != &cin)
-        {
-            cout << "TOO MANY FILENAMES" << endl;
-            return -1;
-        }
-        else {
-            infile1.open(arg);
-            if (infile1.is_open() == false)
-            {
-                cout << "COULD NOT OPEN " << arg << endl;
-                return -1;
-            }
-            in = &infile1;
-        }
+    if( argc == 1 ) {
+        in = &cin;
     }
-    
-    ParseTree *prog = Prog(in, &linenum);
-    if( prog == 0 )
-    {
-        return 0; // quit on error
-    }
-    // debugPrint(prog);
 
+    else if( argc == 2 ) {
+        file.open(argv[1]);
+        if( file.is_open() == false ) {
+            cout << "COULD NOT OPEN " << argv[1] << endl;
+            return 1;
+        }
+        in = &file;
+    }
+
+    else {
+        cout << "TOO MANY FILENAMES" << endl;
+        return 1;
+    }
+
+    ParseTree *prog = Prog(in, &linenum);
+
+    if( prog == 0 )
+        return 0;
 
     cout << "LEAF COUNT: " << prog->LeafCount() << endl;
     cout << "STRING COUNT: " << prog->StringCount() << endl;
+    int idc = prog->IdentCount();
+    if( idc ) {
+        cout << "IDENT COUNT: " << idc << endl;
+        map<string,int> ids;
+        prog->GetVars(ids);
 
-    if(prog->IdentCount() != 0)
-    {
-        cout << "IDENT COUNT: " << prog->IdentCount() << endl;
-        int max = 0;
-        string out = "";
-        /*
-        First For Loop - Gets the Maximum 
-        map<string, int>
-           <key=string=IDENT, amount of times seen>
-            
-        In Each Loop, we check to see if its the "max"
-        
-        max
-        */
-        for (auto it = mapv.begin(); it != mapv.end(); it++)
-        {
-            if (it->second > max)
-            {
-                max = it->second;
-            }
+        // find max
+        int maxval = ids.begin()->second;
+        for( const auto& s : ids )
+            if( s.second > maxval )
+                maxval = s.second;
+        bool printed = false;
+        for( auto s : ids ) {
+            if( s.second != maxval )
+                continue;
+            if( printed )
+                cout << ", ";
+            cout << s.first;
+            printed = true;
         }
-        
-        for (auto it = mapv.begin(); it != mapv.end(); it++)
-        {
-            if (it->second == max)
-            {
-                out += it->first;
-                out += ", ";
-                // if()
-                //cout << prog->StringCount() << endl;
-            }
-        //cout << out << endl;
-        }
-        cout << out.substr(0, out.size() - 2) << endl;
-        
+        cout << endl;
     }
+
+    return 0;
 }

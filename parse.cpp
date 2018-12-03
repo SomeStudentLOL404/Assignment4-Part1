@@ -1,21 +1,12 @@
 /*
  * parse.cpp
+ *
+ *  Created on: Mar 8, 2018
+ *      Author: gerardryan
  */
-#include <vector>
-#include <map>
-#include <set>
-#include <algorithm>
+
 #include "parse.h"
-#include "parsetree.h"
-#include "tokens.h"
-#include <string.h>
 
-// WRAPPER FOR PUSHBACK
-
-map<string, int> mapv;
-
-
-// WRAPPER FOR PUSHBACK
 namespace Parser {
     bool pushed_back = false;
     Token	pushed_token;
@@ -61,19 +52,12 @@ ParseTree *Prog(istream *in, int *line)
 }
 
 // Slist is a Statement followed by a Statement List
-ParseTree *Slist(istream *in, int *line)
-{
-    
-    // cout << "Do we Get to SList???" << endl;
+ParseTree *Slist(istream *in, int *line) {
     ParseTree *s = Stmt(in, line);
     if( s == 0 )
         return 0;
-    
-    Token a = Parser::GetNextToken(in, line);
-    
-    if(a != SC ) {
-        Parser::PushBackToken(a);
-      //  cout << "Value of token is: " << a << " - at line nunber: " << *line << endl;
+
+    if( Parser::GetNextToken(in, line) != SC ) {
         ParseError(*line, "Missing semicolon");
         return 0;
     }
@@ -82,14 +66,6 @@ ParseTree *Slist(istream *in, int *line)
 }
 
 ParseTree *Stmt(istream *in, int *line) {
-    /*
-     * Stmt Grammar Rule:
-     * Stmt := IfStmt | PrintStmt | Expr
-     */
-    //Given so dont change it
-
-    //cout << "Do We Get To Stmt??" << endl;
-
     ParseTree *s;
 
     Token t = Parser::GetNextToken(in, line);
@@ -97,67 +73,74 @@ ParseTree *Stmt(istream *in, int *line) {
         case IF:
             s = IfStmt(in, line);
             break;
+
         case PRINT:
             s = PrintStmt(in, line);
             break;
+
         case DONE:
             return 0;
+
         case ERR:
             ParseError(*line, "Invalid token");
             return 0;
+
         default:
             // put back the token and then see if it's an Expr
             Parser::PushBackToken(t);
             s = Expr(in, line);
-            if( s == 0 )
-            {
+            if( s == 0 ) {
                 ParseError(*line, "Invalid statement");
                 return 0;
             }
             break;
     }
+
+
     return s;
 }
 
-ParseTree *IfStmt(istream *in, int *line)
-{
-
-    ParseTree *t5 = Expr(in, line);
-    if (t5 == 0) {
-        ParseError(*line, "Error at IfStmt - 1");
+ParseTree *IfStmt(istream *in, int *line) {
+    ParseTree *ex = Expr(in, line);
+    if( ex == 0 ) {
+        ParseError(*line, "Missing expression after if");
         return 0;
     }
+
     Token t = Parser::GetNextToken(in, line);
-    if(t.GetTokenType() != THEN ) {
-        Parser::PushBackToken(t);
-        ParseError(*line, "Error at IfStmt - 2");
+
+    if( t != THEN ) {
+        ParseError(*line, "Missing THEN after expression");
         return 0;
     }
 
     ParseTree *stmt = Stmt(in, line);
-
-    return new IfStatement(*line, t5, stmt);
-}
-
-ParseTree *PrintStmt(istream *in, int *line)
-{
-    ParseTree *t2 = Expr(in, line);
-    if(t2 == 0) {
-        ParseError(*line, "Error at PrintStmt - 1");
+    if( stmt == 0 ) {
+        ParseError(*line, "Missing statement after then");
         return 0;
     }
-    return new PrintStatement(t2->GetLinenum(), t2);
+
+    return new IfStatement(t.GetLinenum(), ex, stmt);
 }
 
-ParseTree *Expr(istream *in, int *line)
-{
-  
+ParseTree *PrintStmt(istream *in, int *line) {
+    int l = *line;
 
+    ParseTree *ex = Expr(in, line);
+    if( ex == 0 ) {
+        ParseError(*line, "Missing expression after print");
+        return 0;
+    }
+
+    return new PrintStatement(l, ex);
+}
+
+ParseTree *Expr(istream *in, int *line) {
     ParseTree *t1 = LogicExpr(in, line);
     if( t1 == 0 ) {
-        ParseError(*line, "Error at Expression");
         return 0;
     }
+
     Token t = Parser::GetNextToken(in, line);
 
     if( t != ASSIGN ) {
@@ -170,180 +153,137 @@ ParseTree *Expr(istream *in, int *line)
         ParseError(*line, "Missing expression after operator");
         return 0;
     }
+
     return new Assignment(t.GetLinenum(), t1, t2);
 }
 
-ParseTree *LogicExpr(istream *in, int *line)
-{
+ParseTree *LogicExpr(istream *in, int *line) {
     ParseTree *t1 = CompareExpr(in, line);
     if( t1 == 0 ) {
-        ParseError(*line, "Error at Logic Expression - t1");
-        return 0;
-    }
-    while(true)
-    {
-        
-    Token t = Parser::GetNextToken(in, line);
-    if(t.GetTokenType() != LOGICAND && t.GetTokenType() != LOGICOR)
-    {
-        Parser::PushBackToken(t);
-        return t1;
-    }
-    
-    ParseTree *t2 = CompareExpr(in, line);
-    if(t2 == 0)
-    {
-        ParseError(*line, "Error at Logic Expression - t2");
         return 0;
     }
 
-    if( t == LOGICAND )
-        t1 = new LogicAndExpr(t.GetLinenum(), t1, t2);
-    else if (t == LOGICOR)
-        t1 = new LogicOrExpr(t.GetLinenum(), t1, t2);
+    while ( true ) {
+        Token t = Parser::GetNextToken(in, line);
 
+        if( t != LOGICAND && t != LOGICOR ) {
+            Parser::PushBackToken(t);
+            return t1;
+        }
+
+        ParseTree *t2 = CompareExpr(in, line);
+        if( t2 == 0 ) {
+            ParseError(*line, "Missing expression after operator");
+            return 0;
+        }
+
+        if( t == LOGICAND )
+            t1 = new LogicAndExpr(t.GetLinenum(), t1, t2);
+        else
+            t1 = new LogicOrExpr(t.GetLinenum(), t1, t2);
     }
 }
 
 ParseTree *CompareExpr(istream *in, int *line) {
     ParseTree *t1 = AddExpr(in, line);
-    if( t1 == 0 )
-    {
-        ParseError(*line, "Error at Compare Expression - 1");
+    if( t1 == 0 ) {
         return 0;
     }
 
-    Token t = Parser::GetNextToken(in, line);
-    
-    //cout << "Value of T is: " << t << endl;
-   
-    if(t.GetTokenType() != EQ && t.GetTokenType() != NEQ && t.GetTokenType() != GT && t.GetTokenType() != LT && t.GetTokenType() != LEQ && t.GetTokenType() != GEQ)
-    {
-    
-        Parser::PushBackToken(t);
-        return t1;
-    }
-   
-    ParseTree *t2 = CompareExpr(in, line);
-    if( t2 == 0 )
-    {
-        ParseError(*line, "Error at Compare Expression - 1");
-        return 0;
-    }
+    while ( true ) {
+        Token t = Parser::GetNextToken(in, line);
 
-    if( t == EQ )
-    {
-        return new EqExpr(t.GetLinenum(), t1, t2);
-    }
-    else if (t == NEQ)
-    {
-        return new NEqExpr(t.GetLinenum(), t1, t2);
-    }
-    else if (t == GT)
-    {
-        return new GtExpr(t.GetLinenum(), t1, t2);
-    }
-    else if (t == GEQ)
-    {
-        //cout << "At GEQ: " << t << endl;
-        return new GEqExpr(t.GetLinenum(), t1, t2);
-    }
-    else if (t == LT)
-    {
-        return new LtExpr(t.GetLinenum(), t1, t2);
-    }
-    else if (t == LEQ)
-    {
-       // cout << "Value of t: " << t << endl;
-        return new LEqExpr(t.GetLinenum(), t1, t2);
-    }
-    else
-    {
-        return 0;
-    }
+        if( t != EQ && t != NEQ && t != GT && t != GEQ && t != LT && t != LEQ) {
+            Parser::PushBackToken(t);
+            return t1;
+        }
 
-    //PlusExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
-    //return new PlusExpr(t.GetLinenum(), t1, t2)
+        ParseTree *t2 = AddExpr(in, line);
+        if( t2 == 0 ) {
+            ParseError(*line, "Missing expression after operator");
+            return 0;
+        }
 
+        switch( t.GetTokenType() ) {
+            case EQ:
+                t1 = new EqExpr(t.GetLinenum(), t1, t2);
+                break;
+            case NEQ:
+                t1 = new NEqExpr(t.GetLinenum(), t1, t2);
+                break;
+            case GT:
+                t1 = new GtExpr(t.GetLinenum(), t1, t2);
+                break;
+            case GEQ:
+                t1 = new GEqExpr(t.GetLinenum(), t1, t2);
+                break;
+            case LT:
+                t1 = new LtExpr(t.GetLinenum(), t1, t2);
+                break;
+            case LEQ:
+                t1 = new LEqExpr(t.GetLinenum(), t1, t2);
+                break;
+            default:
+                break;
+        }
+    }
 }
 
-ParseTree *AddExpr(istream *in, int *line)
-{
-    //cout << "Do We Get To AddExpr?" << endl;
-
-    //Part Done Already - DO NOT TOUCH
+ParseTree *AddExpr(istream *in, int *line) {
     ParseTree *t1 = MulExpr(in, line);
     if( t1 == 0 ) {
         return 0;
     }
 
-    while ( true )
-    {
-       
+    while ( true ) {
         Token t = Parser::GetNextToken(in, line);
+
         if( t != PLUS && t != MINUS ) {
             Parser::PushBackToken(t);
             return t1;
         }
+
         ParseTree *t2 = MulExpr(in, line);
         if( t2 == 0 ) {
             ParseError(*line, "Missing expression after operator");
             return 0;
         }
+
         if( t == PLUS )
             t1 = new PlusExpr(t.GetLinenum(), t1, t2);
         else
             t1 = new MinusExpr(t.GetLinenum(), t1, t2);
-        
     }
-    
-    
 }
 
-ParseTree *MulExpr(istream *in, int *line)
-{
-    //cout << "Do we Get to Mult???" << endl;
-
+ParseTree *MulExpr(istream *in, int *line) {
     ParseTree *t1 = Factor(in, line);
-
     if( t1 == 0 ) {
-        ParseError(*line, "Error at MulExpr - 1");
         return 0;
     }
-    
-while(true)
-{
-    Token t = Parser::GetNextToken(in, line);
-    if(t.GetTokenType() != STAR && t.GetTokenType() != SLASH)
-    {
-        Parser::PushBackToken(t);
-        return t1;
-    }
-    ParseTree *t2 = Factor(in, line);
-    if(t2 == 0) 
-    {
-        ParseError(*line, "Error at MulExpress - 2");
-        return 0;
-    }
-    if( t == STAR )
-    {
-        return new TimesExpr(t.GetLinenum(), t1, t2);
-    }
-    // else ( t == SLASH )
-    else
-    {
-        return new TimesExpr(t.GetLinenum(), t1, t2);
-    }
-        //Check back
-}  
 
+    while ( true ) {
+        Token t = Parser::GetNextToken(in, line);
+
+        if( t != STAR && t != SLASH ) {
+            Parser::PushBackToken(t);
+            return t1;
+        }
+
+        ParseTree *t2 = Factor(in, line);
+        if( t2 == 0 ) {
+            ParseError(*line, "Missing expression after operator");
+            return 0;
+        }
+
+        if( t == STAR )
+            t1 = new TimesExpr(t.GetLinenum(), t1, t2);
+        else
+            t1 = new DivideExpr(t.GetLinenum(), t1, t2);
+    }
 }
 
-ParseTree *Factor(istream *in, int *line)
-{
-    // cout << "Do We Get To Factor??" << endl;
-
-    //DO NOT TOUCH
+ParseTree *Factor(istream *in, int *line) {
     bool neg = false;
     Token t = Parser::GetNextToken(in, line);
 
@@ -361,58 +301,43 @@ ParseTree *Factor(istream *in, int *line)
     }
 
     if( neg ) {
-        // handle as -1 * Primary
         return new TimesExpr(t.GetLinenum(), new IConst(t.GetLinenum(), -1), p1);
     }
     else
         return p1;
 }
 
-ParseTree *Primary(istream *in, int *line)
-{
+ParseTree *Primary(istream *in, int *line) {
     Token t = Parser::GetNextToken(in, line);
-    //cout << "T in Primary is: " << t << endl;
-    if(t.GetTokenType() == IDENT)
-    {
-        mapv[t.GetLexeme()]++;        
+
+    if( t == IDENT ) {
         return new Ident(t);
     }
-     if(t.GetTokenType() == ICONST)
-    {
-        //cout << "ICONST value is: " << t << endl;
+    else if( t == ICONST ) {
         return new IConst(t);
     }
-     if(t.GetTokenType() == SCONST)
-    {
+    else if( t == SCONST ) {
         return new SConst(t);
     }
-     if(t.GetTokenType() == TRUE)
-    {
-        return new BoolConst(t, TRUE);
+    else if( t == TRUE ) {
+        return new BoolConst(t, true);
     }
-    if(t.GetTokenType() == FALSE)
-    {
-        return new BoolConst(t, FALSE);
+    else if( t == FALSE ) {
+        return new BoolConst(t, false);
     }
-     if(t.GetTokenType() == LPAREN)
-    {
-        ParseTree *t1 = Expr(in, line);
-        Token t = Parser::GetNextToken(in, line);
+    else if( t == LPAREN ) {
+        ParseTree *ex = Expr(in, line);
+        if( ex == 0 ) {
+            ParseError(*line, "Missing expression after (");
+            return 0;
+        }
+        if( Parser::GetNextToken(in, line) == RPAREN )
+            return ex;
 
-        if(t1 == 0)
-        {
-            ParseError(*line, "Error at Primary -  LPAREN - 1");
-            Parser::PushBackToken(t);
-            return 0;
-        }
-        else if(t.GetTokenType() != RPAREN)
-        {
-            Parser::PushBackToken(t);
-            ParseError(*line, "Error at Primary -  LPAREN - 2");
-            return 0;
-        }
-        return t1;
+        ParseError(*line, "Missing ) after expression");
+        return 0;
     }
+
+    ParseError(*line, "Primary expected");
     return 0;
 }
-
