@@ -4,7 +4,7 @@
 
 #ifndef VALUE_H_
 #define VALUE_H_
-
+#include "parsetree.h"
 #include <string>
 #include <iostream>
 using namespace std;
@@ -64,17 +64,214 @@ public:
 		else out << "TYPE ERROR";
 		return out;
 	}
-
-	Value operator+(const Value& v);
-	Value operator-(const Value& v);
-	Value operator*(const Value& v);
-	Value operator/(const Value& v);
-
-	Value operator<(const Value& v);
-	Value operator<=(const Value& v);
-	Value operator>(const Value& v);
-	Value operator>=(const Value& v);
-	Value operator==(const Value& v);
+    //this == left & v == right
+    
+    //
+    //Operator +
+	Value operator+(const Value& v)
+    {
+     if(this->isIntType() && v.isIntType())
+     {
+      int response = this->getInteger() + v.getInteger();
+      return response;
+     }
+    if(this->isStringType() && v.isStringType())
+    {
+       string responser = this->getString() + v.getString();
+       return responser;
+    }
+     else
+     {
+       Value errorMessage = Value("These arent two integers (value.h file - operator+)", true);
+       return errorMessage;
+     }   
+    }
+    //Operator -
+	Value operator-(const Value& v)
+    {
+     if(this->isIntType() && v.isIntType())
+     {
+      int response = this->getInteger() - v.getInteger();
+      return response;
+     }
+     else
+     {
+      Value errorMessage = Value("These arent two integers (value.h file - operator-)", true);
+      return errorMessage;
+     }   
+    }
+    //Check PDF - We can multiply numbers or even strings .e.g 2*hello
+    //Operator *
+	Value operator*(const Value& v)
+    {   
+        //2*hello - hellohello
+        if(this->isIntType() && v.isStringType())
+        {
+            /*
+            Check to see if were multiplying a string by a positive number
+            e.g. hello*2 and not hello*-2
+            If its positive, loop and add it to a string
+            */
+            if(this->getInteger() > 0)
+            {
+                string addit;
+                for(int i = 0; i < this->getInteger(); i++)
+                {
+                 addit = addit + v.getString();
+                }
+                return addit;
+            }
+            else
+            {
+             Value errorMessage = Value("You cant use a negative integer! (operator* p1)", true);
+             return errorMessage;
+            }
+        }
+        //hello*2
+        //hellohello
+        else if(this->isStringType() && v.isIntType())
+        {
+            /*
+            Check to see if were multiplying a string by a positive number
+            e.g. hello*2 and not hello*-2
+            If its positive, loop and add it to a string
+            */
+            if(v.getInteger() > 0)
+            {
+                string addit;
+                for(int i = 0; i < v.getInteger(); i++)
+                {
+                 addit = addit + this->getString();
+                }
+                return addit;
+            }
+            else
+            {
+              Value errorMessage = Value("You cant use a negative integer! (operator* p2)", true);
+             return errorMessage;   
+            }
+        }
+        else
+        {
+         Value errorMessage = Value("These arent two integers (value.h file - operator '/' )", true);
+         return errorMessage;
+        } 
+    }   
+    //Operator / (Division)
+	Value operator/(const Value& v)
+    {
+     if(this->isIntType() && v.isIntType())
+     {
+      int response = this->getInteger() / v.getInteger();
+      return response;
+     }
+     else
+     {
+      Value errorMessage = Value("These arent two integers (value.h file - operator '/' )", true);
+      return errorMessage;
+     }   
+    }
+    //Operator < 
+	Value operator<(const Value& v)
+    {
+       if(this->isIntType() && v.isIntType())
+       {
+         bool response = this->getInteger() < v.getInteger();
+         return response;
+       }
+       else if (this->isStringType() && v.isStringType())
+       {
+         bool response = this->getString() < v.getString();
+         return response;
+       }
+       else
+       {
+       Value errorMessage = Value("You cant compare these two (value.h file - operator '<' )", true);
+       return errorMessage;  
+       }
+    }
+    //Operator <=
+	Value operator<=(const Value& v)
+    {
+     if(this->isIntType && v.isIntType())
+     {
+      bool response = this->getInteger() <= v.getInteger();
+      return response;
+     }
+     else if(this->isStringType && v.isStringType())
+     {
+      bool response = this->getString() <= v.getString();
+      return response;   
+     }
+      else
+      {
+       Value errorMessage = Value("You cant compare these two (value.h file - operator '<=' )", true);
+       return errorMessage;     
+      }
+    }
+    //Operator >
+	Value operator>(const Value& v)
+    {
+         if(this->isIntType && v.isIntType())
+         {
+          bool response = this->getInteger() > v.getInteger();
+          return response;
+         }
+         else if(this->isStringType && v.isStringType())
+         {
+          bool response = this->getString() > v.getString();
+          return response;   
+         }
+       else
+       {
+       Value errorMessage = Value("You cant compare these two (value.h file - operator '>' )", true);
+       return errorMessage;  
+       }
+    }
+    //Operator >=
+	Value operator>=(const Value& v)
+    {
+     if(this->isIntType && v.isIntType())
+     {
+      bool response = this->getInteger() >= v.getInteger();
+      return response;
+     }
+     else if(this->isStringType && v.isStringType())
+     {
+      bool response = this->getString() >= v.getString();
+      return response;   
+     }
+      else
+      {
+       Value errorMessage = Value("You cant compare these two (value.h file - operator '<=' )", true);
+       return errorMessage;     
+      }      
+    }
+    //Operator ==
+	Value operator==(const Value& v)
+    {
+     if(this->isIntType && v.isIntType())
+     {
+      bool response = this->getInteger() == v.getInteger();
+      return response;
+     }
+     else if(this->isStringType && v.isStringType())
+     {
+      bool response = this->getString() == v.getString();
+      return response;   
+     }
+     else if(this->isBoolType && v.isBoolType())
+     {
+      bool response = this->getString() == v.getString();
+      return response;   
+     }
+      else
+      {
+       Value errorMessage = Value("You cant compare these two (value.h file - operator '==' )", true);
+       return errorMessage;     
+      }    
+    }
+    //Operator !=
 	Value operator!=(const Value& v) {
 		Value ans = this->operator==(v);
 		ans.bval = !ans.bval;
