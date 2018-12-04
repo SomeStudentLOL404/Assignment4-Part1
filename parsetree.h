@@ -143,12 +143,11 @@ public:
 class Assignment : public ParseTree {
 public:
 	Assignment(int line, ParseTree *lhs, ParseTree *rhs) : ParseTree(line, lhs, rhs) {}
-    virtual Value Eval(map <string, Value> &evars)
+    Value Eval(map <string, Value> &evars)
     {
         string aa = left->GetId();
         Value bb = right->Eval(evars);
         
-
         evars[aa] = bb;
         return Value();
      
@@ -294,7 +293,7 @@ class GtExpr : public ParseTree {
 public:
 	GtExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	//NodeType GetType() const { return BOOLTYPE; }
+	NodeType GetType() const { return BOOLTYPE; }
     Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) > right->Eval(evars);
@@ -305,7 +304,7 @@ class GEqExpr : public ParseTree {
 public:
 	GEqExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	//NodeType GetType() const { return BOOLTYPE; }
+	NodeType GetType() const { return BOOLTYPE; }
     Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) >= right->Eval(evars);
@@ -323,6 +322,7 @@ public:
 
 	NodeType GetType() const { return INTTYPE; }
     
+    //FINISH THIS
     Value Eval(map <string, Value> &evars)
     {
       return Value();
@@ -337,6 +337,7 @@ public:
 
 	NodeType GetType() const { return BOOLTYPE; }
     
+    //FINISH THIS
     Value Eval(map <string, Value> &evars)
     {
       return Value();
@@ -354,6 +355,7 @@ public:
 	NodeType GetType() const { return STRTYPE; }
 	bool IsString() const { return true; }
     
+    //FINISH THIS
     Value Eval(map <string, Value> &evars)
     {
       return Value();
@@ -369,6 +371,7 @@ public:
 	bool IsIdent() const { return true; }
 	string GetId() const { return id; }
     
+    //FINISH THIS
     Value Eval(map <string, Value> &evars)
     {
       return Value();
