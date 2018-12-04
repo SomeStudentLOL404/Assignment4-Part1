@@ -25,7 +25,8 @@ class Value;
 extern map<string, Value> evars;
 
 class ParseTree {
-public:
+//if it fails, change to public
+protected:
 	int			linenum;
 	ParseTree	*left;
 	ParseTree	*right;
@@ -130,10 +131,17 @@ public:
     Value Eval(map <string, Value> &evars)
     {
        Value results = left->Eval(evars);
-       if(results.getBoolean() == true)
+       if(results.isBoolType() == true)
        {
-        return right->Eval(evars);  
+         if(results.getBoolean())
+         {
+            return right->Eval(evars);  
+         }
        }
+        else
+        {
+           
+        }
         return Value();
         //return 0;
     }
@@ -160,6 +168,7 @@ public:
 	PrintStatement(int line, ParseTree *e) : ParseTree(line, e) {}
     Value Eval(map <string, Value> &evars)
     {
+      cout << left->Eval(evars) << '\n';
       return Value();
     }
 };
@@ -218,8 +227,9 @@ public:
       }
       else
       {
-       return false;    
+          return false;    
       }
+       return Value();
     }
 };
 
@@ -228,6 +238,9 @@ public:
 	LogicOrExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
 	NodeType GetType() const { return BOOLTYPE; }
+    
+   // Value left1 = left->Eval(evars);
+   // Value right1 = right->Eval(evars);
     
     Value Eval(map <string, Value> &evars)
     {
@@ -239,6 +252,7 @@ public:
       {
        return false;    
       }
+        return Value();
     }
 };
 
@@ -325,7 +339,7 @@ public:
     //FINISH THIS
     Value Eval(map <string, Value> &evars)
     {
-      return Value();
+      return Value(val);
     }
 };
 
@@ -340,7 +354,7 @@ public:
     //FINISH THIS
     Value Eval(map <string, Value> &evars)
     {
-      return Value();
+      return Value(val);
     }
 };
 
@@ -358,7 +372,7 @@ public:
     //FINISH THIS
     Value Eval(map <string, Value> &evars)
     {
-      return Value();
+      return Value(val);
     }
 };
 
@@ -371,11 +385,27 @@ public:
 	bool IsIdent() const { return true; }
 	string GetId() const { return id; }
     
+    Value Eval(map <string, Value> &evars)
+    {
+      if(!evars.empty() && evars.count(id))
+      {
+        return evars[id];
+      }
+      else
+      {
+       Value errorMessage = Value("Error being thrown at Ident", true);
+       return errorMessage; 
+      }
+    }
+    
+    
+    /*
     //FINISH THIS
     Value Eval(map <string, Value> &evars)
     {
       return Value();
     }
+    */
 };
 
 #endif /* PARSETREE_H_ */

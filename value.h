@@ -72,18 +72,21 @@ public:
     {
      if(this->isIntType() && v.isIntType())
      {
-      int response = this->getInteger() + v.getInteger();
-      return response;
+      return Value(this->getInteger() + v.getInteger());
+      
      }
     if(this->isStringType() && v.isStringType())
     {
-       string responser = this->getString() + v.getString();
-       return responser;
+       return Value(this->getString() + v.getString());
     }
      else
      {
+         
        Value errorMessage = Value("These arent two integers (value.h file - operator+)", true);
        return errorMessage;
+       
+      //throw std::runtime_error("You cant add these!");
+
      }   
     }
     //Operator -
@@ -91,8 +94,7 @@ public:
     {
      if(this->isIntType() && v.isIntType())
      {
-      int response = this->getInteger() - v.getInteger();
-      return response;
+      return Value(this->getInteger() - v.getInteger());
      }
      else
      {
@@ -104,15 +106,21 @@ public:
     //Operator *
 	Value operator*(const Value& v)
     {   
+        //2*2
+        if(this->isIntType() && v.isIntType())
+        {
+           return Value(this->getInteger() + v.getInteger());
+            
+        }
         //2*hello - hellohello
-        if(this->isIntType() && v.isStringType())
+       else if(this->isIntType() && v.isStringType())
         {
             /*
             Check to see if were multiplying a string by a positive number
             e.g. hello*2 and not hello*-2
             If its positive, loop and add it to a string
             */
-            if(this->getInteger() > 0)
+            if(this->getInteger() >= 0)
             {
                 string addit;
                 for(int i = 0; i < this->getInteger(); i++)
@@ -129,7 +137,7 @@ public:
         }
         //hello*2
         //hellohello
-        else if(this->isStringType() && v.isIntType())
+       else if(this->isStringType() && v.isIntType())
         {
             /*
             Check to see if were multiplying a string by a positive number
@@ -162,8 +170,17 @@ public:
     {
      if(this->isIntType() && v.isIntType())
      {
-      int response = this->getInteger() / v.getInteger();
-      return response;
+         if(v.ival !=0 )
+         {
+          // int response = this->getInteger() / v.getInteger();
+           //return response;  
+             return Value(this->getInteger() / v.getInteger());
+         }
+         else
+         {
+          Value errorMessage = Value("You cant divide by 0! (value.h file - operator '/' )", true);
+          return errorMessage; 
+         }
      }
      else
      {
@@ -272,10 +289,30 @@ public:
       }    
     }
     //Operator !=
-	Value operator!=(const Value& v) {
+	Value operator!=(const Value& v) 
+    {
+       if(this->isIntType() && v.isIntType())
+       {
+           return Value(this->getInteger() != v.getInteger());
+       }
+       else if (this->isStringType() && v.isStringType())
+       {
+            return Value(this->getString() != v.getString());
+       }
+       else if (this->isBoolType() && v.isBoolType())
+       {
+            return Value(this->getBoolean() != v.getBoolean());
+       }
+       else
+       {
+        Value errorMessage = Value("You cant compare these two (value.h file - operator '!=' )", true);
+       return errorMessage;   
+       }
+        /*
 		Value ans = this->operator==(v);
 		ans.bval = !ans.bval;
 		return ans;
+        */
 	}
 };
 
