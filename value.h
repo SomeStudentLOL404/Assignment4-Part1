@@ -85,7 +85,7 @@ public:
      {
 
         RunTimeError("Cannot add these two values");
-         return Value();
+        return Value();
       //throw std::runtime_error("You cant add these!");
      }   
     }
@@ -98,8 +98,8 @@ public:
      }
      else
      {
-      Value errorMessage = Value("These arent two integers (value.h file - operator-)", true);
-      return errorMessage;
+        RunTimeError("Cannot subtract these two values");
+        return Value();
      }   
     }
     //Check PDF - We can multiply numbers or even strings .e.g 2*hello
