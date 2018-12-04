@@ -13,6 +13,7 @@ using namespace std;
 
 // NodeType represents all possible types
 enum NodeType { ERRTYPE, INTTYPE, STRTYPE, BOOLTYPE };
+extern void RunTimeError (string);
 
 // a "forward declaration" for a class to hold values
 class Value;
@@ -23,6 +24,8 @@ class Value;
 
 //--
 extern map<string, Value> evars;
+
+
 
 class ParseTree {
 //if it fails, change to public
@@ -140,7 +143,7 @@ public:
        }
         else
         {
-           
+            RunTimeError("if expression is not boolean typed");
         }
         return Value();
         //return 0;

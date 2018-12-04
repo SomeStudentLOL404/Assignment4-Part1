@@ -5,12 +5,15 @@
 #include "tokens.h"
 #include "parse.h"
 #include <fstream>
-using std::cin;
-using std::cout;
-using std::endl;
-using std::ifstream;
+using namespace std;
 
 map<string, Value> evars;
+
+void RunTimeError(string msg)
+{
+    cout << "0: RUNTIME ERROR " << msg << endl;
+    exit(1);
+}
 
 int
 main(int argc, char *argv[])
