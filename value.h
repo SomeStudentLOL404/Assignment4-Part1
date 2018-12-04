@@ -9,6 +9,8 @@
 #include <iostream>
 using namespace std;
 
+extern void RunTimeError (string);
+
 // object holds boolean, integer, or string, and remembers which it holds
 class Value {
 	bool		bval;
@@ -81,12 +83,10 @@ public:
     }
      else
      {
-         
-       Value errorMessage = Value("These arent two integers (value.h file - operator+)", true);
-       return errorMessage;
-       
-      //throw std::runtime_error("You cant add these!");
 
+        RunTimeError("Cannot add these two values");
+         return Value();
+      //throw std::runtime_error("You cant add these!");
      }   
     }
     //Operator -
