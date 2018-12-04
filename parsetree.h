@@ -6,8 +6,10 @@
 #define PARSETREE_H_
 #include <vector>
 #include <map>
-using std::vector;
-using std::map;
+#include "parse.h"
+#include "value.h"
+#include "tokens.h"
+using namespace std;
 
 // NodeType represents all possible types
 enum NodeType { ERRTYPE, INTTYPE, STRTYPE, BOOLTYPE };
@@ -110,7 +112,7 @@ class StmtList : public ParseTree {
 public:
 	StmtList(ParseTree *l, ParseTree *r) : ParseTree(0, l, r) {}
     
-    virtual Value Eval(map <string, Value> &evars)
+    Value Eval(map <string, Value> &evars)
     {
         left->Eval(evars);
         if(right)
@@ -125,10 +127,10 @@ class IfStatement : public ParseTree {
 public:
 	IfStatement(int line, ParseTree *ex, ParseTree *stmt) : ParseTree(line, ex, stmt) {}
     
-    virtual Value Eval(map <string, Value> &evars)
+    Value Eval(map <string, Value> &evars)
     {
        Value results = left->Eval(evars);
-       if(results.GetBoolValue() == true)
+       if(results.getBoolean() == true)
        {
         return right->Eval(evars);  
        }
@@ -141,21 +143,33 @@ public:
 class Assignment : public ParseTree {
 public:
 	Assignment(int line, ParseTree *lhs, ParseTree *rhs) : ParseTree(line, lhs, rhs) {}
-    return Value();
-    
+    virtual Value Eval(map <string, Value> &evars)
+    {
+        string aa = left->GetId();
+        Value bb = right->Eval(evars);
+        
+
+        evars[aa] = bb;
+        return Value();
+     
+        //&evars.insert(left->Eval(&evars), right->Eval(&evars));  
+    }
 };
 
 class PrintStatement : public ParseTree {
 public:
 	PrintStatement(int line, ParseTree *e) : ParseTree(line, e) {}
-    return Value();
+    Value Eval(map <string, Value> &evars)
+    {
+      return Value();
+    }
 };
 
 class PlusExpr : public ParseTree {
 public:
 	PlusExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
     
-    virtual Value Eval(map <string, Value> &evars)
+    Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) + right->Eval(evars);
     }
@@ -165,7 +179,7 @@ class MinusExpr : public ParseTree {
 public:
 	MinusExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
     
-    virtual Value Eval(map <string, Value> &evars)
+    Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) - right->Eval(evars);
     }
@@ -175,7 +189,7 @@ class TimesExpr : public ParseTree {
 public:
 	TimesExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
     
-     virtual Value Eval(map <string, Value> &evars)
+    Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) * right->Eval(evars);
     }
@@ -185,7 +199,7 @@ class DivideExpr : public ParseTree {
 public:
 	DivideExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
     
-     virtual Value Eval(map <string, Value> &evars)
+    Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) / right->Eval(evars);
     }
@@ -195,9 +209,9 @@ class LogicAndExpr : public ParseTree {
 public:
 	LogicAndExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	//NodeType GetType() const { return BOOLTYPE; }
+	NodeType GetType() const { return BOOLTYPE; }
     
-     virtual Value Eval(map <string, Value> &evars)
+     Value Eval(map <string, Value> &evars)
     {
       if(left && right)
       {
@@ -214,9 +228,9 @@ class LogicOrExpr : public ParseTree {
 public:
 	LogicOrExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	//NodeType GetType() const { return BOOLTYPE; }
+	NodeType GetType() const { return BOOLTYPE; }
     
-    virtual Value Eval(map <string, Value> &evars)
+    Value Eval(map <string, Value> &evars)
     {
       if(left && right)
       {
@@ -233,8 +247,8 @@ class EqExpr : public ParseTree {
 public:
 	EqExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	//NodeType GetType() const { return BOOLTYPE; }
-     virtual Value Eval(map <string, Value> &evars)
+	NodeType GetType() const { return BOOLTYPE; }
+    Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) == right->Eval(evars);
     }
@@ -244,9 +258,9 @@ class NEqExpr : public ParseTree {
 public:
 	NEqExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	//NodeType GetType() const { return BOOLTYPE; }
+   NodeType GetType() const { return BOOLTYPE; }
     
-    virtual Value Eval(map <string, Value> &evars)
+   Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) != right->Eval(evars);
     }
@@ -258,8 +272,8 @@ class LtExpr : public ParseTree {
 public:
 	LtExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	//NodeType GetType() const { return BOOLTYPE; }
-    virtual Value Eval(map <string, Value> &evars)
+	NodeType GetType() const { return BOOLTYPE; }
+    Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) < right->Eval(evars);
     }
@@ -269,8 +283,8 @@ class LEqExpr : public ParseTree {
 public:
 	LEqExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	//NodeType GetType() const { return BOOLTYPE; }
-    virtual Value Eval(map <string, Value> &evars)
+	NodeType GetType() const { return BOOLTYPE; }
+    Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) <= right->Eval(evars);
     }
@@ -281,7 +295,7 @@ public:
 	GtExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
 	//NodeType GetType() const { return BOOLTYPE; }
-    virtual Value Eval(map <string, Value> &evars)
+    Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) > right->Eval(evars);
     }
@@ -292,7 +306,7 @@ public:
 	GEqExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
 	//NodeType GetType() const { return BOOLTYPE; }
-    virtual Value Eval(map <string, Value> &evars)
+    Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) >= right->Eval(evars);
     }
@@ -308,6 +322,11 @@ public:
 	}
 
 	NodeType GetType() const { return INTTYPE; }
+    
+    Value Eval(map <string, Value> &evars)
+    {
+      return Value();
+    }
 };
 
 class BoolConst : public ParseTree {

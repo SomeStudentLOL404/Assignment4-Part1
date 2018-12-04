@@ -193,12 +193,12 @@ public:
     //Operator <=
 	Value operator<=(const Value& v)
     {
-     if(this->isIntType && v.isIntType())
+     if(this->isIntType() && v.isIntType())
      {
       bool response = this->getInteger() <= v.getInteger();
       return response;
      }
-     else if(this->isStringType && v.isStringType())
+     else if(this->isStringType() && v.isStringType())
      {
       bool response = this->getString() <= v.getString();
       return response;   
@@ -212,12 +212,12 @@ public:
     //Operator >
 	Value operator>(const Value& v)
     {
-         if(this->isIntType && v.isIntType())
+         if(this->isIntType() && v.isIntType())
          {
           bool response = this->getInteger() > v.getInteger();
           return response;
          }
-         else if(this->isStringType && v.isStringType())
+         else if(this->isStringType() && v.isStringType())
          {
           bool response = this->getString() > v.getString();
           return response;   
@@ -231,12 +231,12 @@ public:
     //Operator >=
 	Value operator>=(const Value& v)
     {
-     if(this->isIntType && v.isIntType())
+     if(this->isIntType() && v.isIntType())
      {
       bool response = this->getInteger() >= v.getInteger();
       return response;
      }
-     else if(this->isStringType && v.isStringType())
+     else if(this->isStringType() && v.isStringType())
      {
       bool response = this->getString() >= v.getString();
       return response;   
@@ -250,17 +250,17 @@ public:
     //Operator ==
 	Value operator==(const Value& v)
     {
-     if(this->isIntType && v.isIntType())
+     if(this->isIntType() && v.isIntType())
      {
       bool response = this->getInteger() == v.getInteger();
       return response;
      }
-     else if(this->isStringType && v.isStringType())
+     else if(this->isStringType() && v.isStringType())
      {
       bool response = this->getString() == v.getString();
       return response;   
      }
-     else if(this->isBoolType && v.isBoolType())
+     else if(this->isBoolType() && v.isBoolType())
      {
       bool response = this->getString() == v.getString();
       return response;   
