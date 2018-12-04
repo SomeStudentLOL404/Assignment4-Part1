@@ -336,6 +336,11 @@ public:
 	BoolConst(Token& t, bool val) : ParseTree(t.GetLinenum()), val(val) {}
 
 	NodeType GetType() const { return BOOLTYPE; }
+    
+    Value Eval(map <string, Value> &evars)
+    {
+      return Value();
+    }
 };
 
 class SConst : public ParseTree {
@@ -348,6 +353,11 @@ public:
 
 	NodeType GetType() const { return STRTYPE; }
 	bool IsString() const { return true; }
+    
+    Value Eval(map <string, Value> &evars)
+    {
+      return Value();
+    }
 };
 
 class Ident : public ParseTree {
@@ -358,6 +368,11 @@ public:
 
 	bool IsIdent() const { return true; }
 	string GetId() const { return id; }
+    
+    Value Eval(map <string, Value> &evars)
+    {
+      return Value();
+    }
 };
 
 #endif /* PARSETREE_H_ */
