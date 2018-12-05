@@ -293,7 +293,7 @@ public:
      }
      else if(this->isBoolType() && v.isBoolType())
      {
-      bool response = this->getString() == v.getString();
+      bool response = this->getBoolean() == v.getBoolean();
       return response;   
      }
       else
