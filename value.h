@@ -168,7 +168,11 @@ public:
              return Value();  
             }
         }
-       
+        else if(this->isIntType() && v.isBoolType())
+        {
+            bool response = !v.getBoolean();
+            return response;
+        }
         else
         {
         RunTimeError("Cannot multiply these two values");
