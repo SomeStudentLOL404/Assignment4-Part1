@@ -272,7 +272,6 @@ public:
         return Value();
     }
 
-    
     /*
     if(left && right)
       {

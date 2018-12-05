@@ -72,7 +72,7 @@ public:
     //Operator +
 	Value operator+(const Value& v)
     {
-     if(type == isInt && v.type == isInt)
+     if(this->isIntType() && v.type == isInt)
      {
       return Value(this->getInteger() + v.getInteger());
       
@@ -121,12 +121,17 @@ public:
             */
             if(this->getInteger() >= 0)
             {
-                string addit;
+                string addit = "";
                 for(int i = 0; i < this->getInteger(); i++)
                 {
                  addit = addit + v.getString();
                 }
                 return addit;
+            }
+            else if (v.getInteger() == 0)
+            {
+             string addit = "";
+             return addit;
             }
             else
             {
@@ -145,12 +150,17 @@ public:
             */
             if(v.getInteger() > 0)
             {
-                string addit;
+                string addit = "";
                 for(int i = 0; i < v.getInteger(); i++)
                 {
                  addit = addit + this->getString();
                 }
                 return addit;
+            }
+            else if (v.getInteger() == 0)
+            {
+             string addit = "";
+             return addit;
             }
             else
             {
