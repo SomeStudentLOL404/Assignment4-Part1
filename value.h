@@ -131,8 +131,8 @@ public:
             }
             else
             {
-             Value errorMessage = Value("You cant use a negative integer! (operator* p1)", true);
-             return errorMessage;
+             RunTimeError("Cannot multiply a string by a negative integer");
+             return Value();
             }
         }
         //hello*2
@@ -155,14 +155,15 @@ public:
             }
             else
             {
-              Value errorMessage = Value("You cant use a negative integer! (operator* p2)", true);
-             return errorMessage;   
+             RunTimeError("Cannot multiply a string by a negative integer");
+             return Value();  
             }
         }
+       
         else
         {
-         Value errorMessage = Value("These arent two integers (value.h file - operator '/' )", true);
-         return errorMessage;
+        RunTimeError("Cannot multiply these two values");
+        return Value();
         } 
     }   
     //Operator / (Division)
@@ -178,14 +179,14 @@ public:
          }
          else
          {
-          Value errorMessage = Value("You cant divide by 0! (value.h file - operator '/' )", true);
-          return errorMessage; 
+           RunTimeError("Cannot divide by 0");
+           return Value();
          }
      }
      else
      {
-      Value errorMessage = Value("These arent two integers (value.h file - operator '/' )", true);
-      return errorMessage;
+        RunTimeError("Cannot divide these two values");
+        return Value();
      }   
     }
     //Operator < 
@@ -203,8 +204,8 @@ public:
        }
        else
        {
-       Value errorMessage = Value("You cant compare these two (value.h file - operator '<' )", true);
-       return errorMessage;  
+        RunTimeError("Type mismatch in <");
+        return Value();
        }
     }
     //Operator <=
@@ -222,8 +223,8 @@ public:
      }
       else
       {
-       Value errorMessage = Value("You cant compare these two (value.h file - operator '<=' )", true);
-       return errorMessage;     
+        RunTimeError("Type mismatch in <=");
+        return Value(); 
       }
     }
     //Operator >
@@ -241,8 +242,8 @@ public:
          }
        else
        {
-       Value errorMessage = Value("You cant compare these two (value.h file - operator '>' )", true);
-       return errorMessage;  
+        RunTimeError("Type mismatch in >");
+        return Value();
        }
     }
     //Operator >=
@@ -260,8 +261,8 @@ public:
      }
       else
       {
-       Value errorMessage = Value("You cant compare these two (value.h file - operator '<=' )", true);
-       return errorMessage;     
+        RunTimeError("Type mismatch in >=");
+        return Value();  
       }      
     }
     //Operator ==
@@ -284,8 +285,8 @@ public:
      }
       else
       {
-       Value errorMessage = Value("You cant compare these two (value.h file - operator '==' )", true);
-       return errorMessage;     
+        RunTimeError("Type mismatch in ==");
+        return Value();    
       }    
     }
     //Operator !=
@@ -305,8 +306,8 @@ public:
        }
        else
        {
-        Value errorMessage = Value("You cant compare these two (value.h file - operator '!=' )", true);
-       return errorMessage;   
+        RunTimeError("Type mismatch in !=");
+        return Value();
        }
         /*
 		Value ans = this->operator==(v);

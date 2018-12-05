@@ -159,6 +159,7 @@ public:
         string aa = left->GetId();
         Value bb = right->Eval(evars);
         
+        //http://www.cplusplus.com/reference/map/map/operator[]/
         evars[aa] = bb;
         return Value();
      
@@ -396,9 +397,10 @@ public:
       }
       else
       {
-       Value errorMessage = Value("Error being thrown at Ident", true);
-       return errorMessage; 
+       RunTimeError("Variable is used before being set");
+          return Value();
       }
+        return Value();
     }
     
     
