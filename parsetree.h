@@ -154,16 +154,49 @@ public:
 class Assignment : public ParseTree {
 public:
 	Assignment(int line, ParseTree *lhs, ParseTree *rhs) : ParseTree(line, lhs, rhs) {}
+    
+    /*
+    Do not use:
+    &evars.insert(left->Eval(&evars), right->Eval(&evars));
+    
+    Instead, use: 
+    evars[aa] = bb;
+    As explained in:
+    http://www.cplusplus.com/reference/map/map/operator[]/
+    */
     Value Eval(map <string, Value> &evars)
     {
+        if(left->IsIdent())
+        {
+           if(evars.count(left->GetId()) && !evars.empty())
+           {
+             Value right1 = right->Eval(evars);
+             string left1 = left->GetId();
+               
+             evars[left1] = right;
+           }
+           else
+           {
+             Value right1 = right->Eval(evars);
+             string left1 = left->GetId();
+              
+             evars.insert (std::pair<string, Value>(left1, right1));
+
+             //evars[left1] = right;   
+           }
+        }
+        else
+        {
+          RunTimeError("Left hand side must be an identifier");
+        }
+        return Value();
+        /*
         string aa = left->GetId();
         Value bb = right->Eval(evars);
-        
         //http://www.cplusplus.com/reference/map/map/operator[]/
         evars[aa] = bb;
-        return Value();
-     
-        //&evars.insert(left->Eval(&evars), right->Eval(&evars));  
+        return Value();   
+        */
     }
 };
 
