@@ -241,20 +241,20 @@ class LogicOrExpr : public ParseTree {
 public:
 	LogicOrExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	NodeType GetType() const { return BOOLTYPE; }
-    
-   // Value left1 = left->Eval(evars);
-   // Value right1 = right->Eval(evars);
+	//NodeType GetType() const { return BOOLTYPE; }
     
     Value Eval(map <string, Value> &evars)
     {
-      if(left && right)
+      Value left1 = left->Eval(evars);
+      Value right1 = right->Eval(evars);
+      if (left1.isBoolType() || right1.isBoolType())
       {
-         return true;
+          return left1.isTrue() || right1.isTrue();
       }
       else
       {
-       return false;    
+        RunTimeError("first operand of || is not boolean typed");
+        return Value();  
       }
         return Value();
     }
