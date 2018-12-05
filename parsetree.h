@@ -45,10 +45,9 @@ public:
 	int GetLinenum() const { return linenum; }
 
 	virtual NodeType GetType() const { return ERRTYPE; }
-    
     virtual bool IsStringConst() const { return false; }
     virtual bool IsIdent() const { return false; }
-    virtual bool BoolYes() const { return false; }
+    virtual bool IsBooler() const { return false; }
     virtual bool getBool() const {return false; }
 	virtual string GetId() const { return ""; }
 
@@ -175,7 +174,7 @@ public:
              Value right1 = right->Eval(evars);
              string left1 = left->GetId();
                
-             evars[left1] = right;
+             evars[left1] = right1;
            }
            else
            {
@@ -402,7 +401,7 @@ public:
 
 	NodeType GetType() const { return BOOLTYPE; }
     
-   bool BoolYes() const { return true; }
+   bool IsBooler() const { return true; }
    bool getBool() const {return val; }
 
    virtual Value Eval(map <string, Value> &evars)
