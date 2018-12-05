@@ -26,7 +26,6 @@ class Value;
 extern map<string, Value> evars;
 
 
-
 class ParseTree {
 //if it fails, change to public
 protected:
@@ -46,6 +45,12 @@ public:
 	int GetLinenum() const { return linenum; }
 
 	virtual NodeType GetType() const { return ERRTYPE; }
+    
+    virtual bool IsStringConst() const { return false; }
+    virtual bool IsIdent() const { return false; }
+    virtual bool BoolYes() const { return false; }
+    virtual bool getBool() const {return false; }
+	virtual string GetId() const { return ""; }
 
 	int LeafCount() const {
 		int lc = 0;
@@ -56,10 +61,6 @@ public:
 		return lc;
 	}
 
-	virtual bool IsIdent() const { return false; }
-	virtual bool IsString() const { return false; }
-
-	virtual string GetId() const { return ""; }
 
 	int IdentCount() const {
 		int cnt = 0;
@@ -74,7 +75,7 @@ public:
 		int cnt = 0;
 		if( left ) cnt += left->StringCount();
 		if( right ) cnt += right->StringCount();
-		if( IsString() )
+		if( IsStringConst() )
 			cnt++;
 		return cnt;
 	}
@@ -116,7 +117,7 @@ class StmtList : public ParseTree {
 public:
 	StmtList(ParseTree *l, ParseTree *r) : ParseTree(0, l, r) {}
     
-    Value Eval(map <string, Value> &evars)
+    virtual Value Eval(map <string, Value> &evars)
     {
         left->Eval(evars);
         if(right)
@@ -131,7 +132,7 @@ class IfStatement : public ParseTree {
 public:
 	IfStatement(int line, ParseTree *ex, ParseTree *stmt) : ParseTree(line, ex, stmt) {}
     
-    Value Eval(map <string, Value> &evars)
+   virtual Value Eval(map <string, Value> &evars)
     {
        Value results = left->Eval(evars);
        if(results.isBoolType() == true)
@@ -154,7 +155,6 @@ public:
 class Assignment : public ParseTree {
 public:
 	Assignment(int line, ParseTree *lhs, ParseTree *rhs) : ParseTree(line, lhs, rhs) {}
-    
     /*
     Do not use:
     &evars.insert(left->Eval(&evars), right->Eval(&evars));
@@ -163,8 +163,10 @@ public:
     evars[aa] = bb;
     As explained in:
     http://www.cplusplus.com/reference/map/map/operator[]/
+    
+    LMAO IGNORE THAT
     */
-    Value Eval(map <string, Value> &evars)
+    virtual Value Eval(map <string, Value> &evars)
     {
         if(left->IsIdent())
         {
@@ -181,7 +183,6 @@ public:
              string left1 = left->GetId();
               
              evars.insert (std::pair<string, Value>(left1, right1));
-
              //evars[left1] = right;   
            }
         }
@@ -203,7 +204,7 @@ public:
 class PrintStatement : public ParseTree {
 public:
 	PrintStatement(int line, ParseTree *e) : ParseTree(line, e) {}
-    Value Eval(map <string, Value> &evars)
+    virtual Value Eval(map <string, Value> &evars)
     {
       cout << left->Eval(evars) << '\n';
       return Value();
@@ -214,7 +215,7 @@ class PlusExpr : public ParseTree {
 public:
 	PlusExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
     
-    Value Eval(map <string, Value> &evars)
+    virtual Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) + right->Eval(evars);
     }
@@ -224,7 +225,7 @@ class MinusExpr : public ParseTree {
 public:
 	MinusExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
     
-    Value Eval(map <string, Value> &evars)
+    virtual Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) - right->Eval(evars);
     }
@@ -234,7 +235,7 @@ class TimesExpr : public ParseTree {
 public:
 	TimesExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
     
-    Value Eval(map <string, Value> &evars)
+    virtual Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) * right->Eval(evars);
     }
@@ -244,7 +245,7 @@ class DivideExpr : public ParseTree {
 public:
 	DivideExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
     
-    Value Eval(map <string, Value> &evars)
+    virtual Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) / right->Eval(evars);
     }
@@ -256,7 +257,7 @@ public:
 
 	//NodeType GetType() const { return BOOLTYPE; }
     
-     Value Eval(map <string, Value> &evars)
+     virtual Value Eval(map <string, Value> &evars)
     {
       Value left1 = left->Eval(evars);
       Value right1 = right->Eval(evars);
@@ -283,7 +284,6 @@ public:
           return false;    
       }
        return Value();
-    
     */
 };
 
@@ -293,7 +293,7 @@ public:
 
 	//NodeType GetType() const { return BOOLTYPE; }
     
-    Value Eval(map <string, Value> &evars)
+    virtual Value Eval(map <string, Value> &evars)
     {
       Value left1 = left->Eval(evars);
       Value right1 = right->Eval(evars);
@@ -314,8 +314,8 @@ class EqExpr : public ParseTree {
 public:
 	EqExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	NodeType GetType() const { return BOOLTYPE; }
-    Value Eval(map <string, Value> &evars)
+	//NodeType GetType() const { return BOOLTYPE; }
+    virtual Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) == right->Eval(evars);
     }
@@ -325,22 +325,20 @@ class NEqExpr : public ParseTree {
 public:
 	NEqExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-   NodeType GetType() const { return BOOLTYPE; }
+   //NodeType GetType() const { return BOOLTYPE; }
     
-   Value Eval(map <string, Value> &evars)
+   virtual Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) != right->Eval(evars);
     }
-    
-  
 };
 
 class LtExpr : public ParseTree {
 public:
 	LtExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	NodeType GetType() const { return BOOLTYPE; }
-    Value Eval(map <string, Value> &evars)
+	//NodeType GetType() const { return BOOLTYPE; }
+   virtual Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) < right->Eval(evars);
     }
@@ -350,8 +348,8 @@ class LEqExpr : public ParseTree {
 public:
 	LEqExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	NodeType GetType() const { return BOOLTYPE; }
-    Value Eval(map <string, Value> &evars)
+	//NodeType GetType() const { return BOOLTYPE; }
+   virtual Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) <= right->Eval(evars);
     }
@@ -361,8 +359,8 @@ class GtExpr : public ParseTree {
 public:
 	GtExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	NodeType GetType() const { return BOOLTYPE; }
-    Value Eval(map <string, Value> &evars)
+	//NodeType GetType() const { return BOOLTYPE; }
+    virtual Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) > right->Eval(evars);
     }
@@ -372,8 +370,8 @@ class GEqExpr : public ParseTree {
 public:
 	GEqExpr(int line, ParseTree *l, ParseTree *r) : ParseTree(line,l,r) {}
 
-	NodeType GetType() const { return BOOLTYPE; }
-    Value Eval(map <string, Value> &evars)
+	//NodeType GetType() const { return BOOLTYPE; }
+    virtual Value Eval(map <string, Value> &evars)
     {
       return left->Eval(evars) >= right->Eval(evars);
     }
@@ -389,9 +387,8 @@ public:
 	}
 
 	NodeType GetType() const { return INTTYPE; }
-    
-    //FINISH THIS
-    Value Eval(map <string, Value> &evars)
+
+    virtual Value Eval(map <string, Value> &evars)
     {
       return Value(val);
     }
@@ -405,8 +402,10 @@ public:
 
 	NodeType GetType() const { return BOOLTYPE; }
     
-    //FINISH THIS
-    Value Eval(map <string, Value> &evars)
+   bool BoolYes() const { return true; }
+   bool getBool() const {return val; }
+
+   virtual Value Eval(map <string, Value> &evars)
     {
       return Value(val);
     }
@@ -421,10 +420,9 @@ public:
 	}
 
 	NodeType GetType() const { return STRTYPE; }
-	bool IsString() const { return true; }
+	bool IsStringConst() const { return true; }
     
-    //FINISH THIS
-    Value Eval(map <string, Value> &evars)
+   virtual Value Eval(map <string, Value> &evars)
     {
       return Value(val);
     }
@@ -439,7 +437,7 @@ public:
 	bool IsIdent() const { return true; }
 	string GetId() const { return id; }
     
-    Value Eval(map <string, Value> &evars)
+    virtual Value Eval(map <string, Value> &evars)
     {
       if(!evars.empty() && evars.count(id))
       {
@@ -452,8 +450,6 @@ public:
       }
         return Value();
     }
-    
-    
     /*
     //FINISH THIS
     Value Eval(map <string, Value> &evars)

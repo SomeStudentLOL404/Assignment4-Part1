@@ -72,7 +72,7 @@ public:
     //Operator +
 	Value operator+(const Value& v)
     {
-     if(this->isIntType() && v.isIntType())
+     if(type == isInt && v.type == isInt)
      {
       return Value(this->getInteger() + v.getInteger());
       
@@ -110,7 +110,6 @@ public:
         if(this->isIntType() && v.isIntType())
         {
            return Value(this->getInteger() * v.getInteger());
-            
         }
         //2*hello - hellohello
        else if(this->isIntType() && v.isStringType())
