@@ -109,7 +109,7 @@ public:
         //2*2
         if(this->isIntType() && v.isIntType())
         {
-           return Value(this->getInteger() + v.getInteger());
+           return Value(this->getInteger() * v.getInteger());
             
         }
         //2*hello - hellohello
